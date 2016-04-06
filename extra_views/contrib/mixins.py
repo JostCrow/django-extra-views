@@ -322,16 +322,23 @@ class FilterMixin(object):
 
             if isinstance(field_names, tuple):
                 if db_value:
-                    if '_id' in field_names[0]:
+                    first, rest = field_names[0], field_names[1:]
+                    if '_id' in first:
                         try:
                             db_value = int(db_value)
                         except Exception as e:
                             return
-
+                    print(*rest)
+                    print(first)
+                    print(db_value)
                     obj_list = self.model.objects.filter(
-                        **{field_names[0]: db_value}).values_list(field_names[1], flat=True)
+                        **{first: db_value}).values_list(*rest).distinct()
                     if obj_list.count() > 0:
-                        display_value = obj_list[0]
+                        if len(rest) == 1:
+                            display_name = obj_list[0]
+                        else:
+                            obj_list = obj_list[0]
+                            display_value = '{} ({})'.format(obj_list[0], obj_list[1])
             elif '__' not in field_names:
                 field = self.model._meta.get_field(field_names)
                 if field.choices:
@@ -376,6 +383,8 @@ class FilterMixin(object):
             else:
                 field_name = field_names
 
+            if db_value == '(none)':
+                db_value = None
             filter_q.append(Q(**{field_name: db_value}))
 
         for display_name in self.request.GET:
@@ -399,8 +408,9 @@ class FilterMixin(object):
 
             if isinstance(fields, tuple):
                 res = self.get_queryset().order_by(fields[1]).values_list(
-                    fields[0], fields[1]
+                    *fields
                 ).distinct()
+
             else:
                 field_name = fields
                 if '__' not in field_name:
