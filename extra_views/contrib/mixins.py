@@ -328,9 +328,6 @@ class FilterMixin(object):
                             db_value = int(db_value)
                         except Exception as e:
                             return
-                    print(*rest)
-                    print(first)
-                    print(db_value)
                     obj_list = self.model.objects.filter(
                         **{first: db_value}).values_list(*rest).distinct()
                     if obj_list.count() > 0:
@@ -383,6 +380,28 @@ class FilterMixin(object):
             else:
                 field_name = field_names
 
+            if '__' not in field_name and db_value in ['(none)', '%28none%29']:
+                field = self.model._meta.get_field_by_name(field_name)[0]
+                if field.empty_strings_allowed:
+                    db_value = ''
+                else:
+                    db_value = None
+            else:
+                parts = field_name.split('__')
+                meta = self.model._meta
+                while len(parts) > 0:
+                    model_name = parts.pop(0)
+                    field = meta.get_field_by_name(model_name)[0]
+                    if field.related_model:
+                        meta = field.related_model._meta
+                    else:
+                        break
+                if field.empty_strings_allowed:
+                    db_value = ''
+                else:
+                    db_value = None
+
+
             if db_value == '(none)':
                 db_value = None
             filter_q.append(Q(**{field_name: db_value}))
@@ -418,11 +437,11 @@ class FilterMixin(object):
                     if field.choices:
                         res = field.choices
                     else:
-                        res = self.get_queryset().order_by(
-                            field_name).values_list(field_name).distinct()
+                        res = set(self.get_queryset().order_by(
+                            field_name).values_list(field_name).distinct())
                 else:
-                    res = self.get_queryset().order_by(
-                        field_name).values_list(field_name).distinct()
+                    res = set(self.get_queryset().order_by(
+                        field_name).values_list(field_name))
 
             options[display_name] = res
 
