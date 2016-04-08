@@ -365,11 +365,11 @@ class FilterMixin(object):
 
         filters = OrderedDict(self.filter_fields)
 
-        def append_filter(display_name, db_value):
-            field_names = filters.get(display_name)
+        field_names = filters.get(display_name)
             if not field_names or not db_value:
                 return
-
+            print(display_name)
+            print(db_value)
             if isinstance(field_names, tuple):
                 field_name = field_names[0]
                 if '_id' in field_name:
@@ -386,7 +386,7 @@ class FilterMixin(object):
                     db_value = ''
                 else:
                     db_value = None
-            else:
+            elif db_value in ['(none)', '%28none%29']:
                 parts = field_name.split('__')
                 meta = self.model._meta
                 while len(parts) > 0:
@@ -401,9 +401,6 @@ class FilterMixin(object):
                 else:
                     db_value = None
 
-
-            if db_value == '(none)':
-                db_value = None
             filter_q.append(Q(**{field_name: db_value}))
 
         for display_name in self.request.GET:
