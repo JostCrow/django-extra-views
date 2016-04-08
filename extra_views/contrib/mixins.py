@@ -365,7 +365,8 @@ class FilterMixin(object):
 
         filters = OrderedDict(self.filter_fields)
 
-        field_names = filters.get(display_name)
+        def append_filter(display_name, db_value):
+            field_names = filters.get(display_name)
             if not field_names or not db_value:
                 return
             print(display_name)
