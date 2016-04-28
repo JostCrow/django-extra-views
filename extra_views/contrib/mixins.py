@@ -432,6 +432,8 @@ class FilterMixin(object):
                     field = self.model._meta.get_field(field_name)
                     if field.choices:
                         res = field.choices
+                        if field.blank:
+                            res = res + (('(none)', 'Blank'), )
                     else:
                         res = set(self.get_queryset().order_by(
                             field_name).values_list(field_name).distinct())
