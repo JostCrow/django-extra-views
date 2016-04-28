@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='django-extra-views',
-    version='1.1.1',
+    version='1.1.2',
     url='https://github.com/AndrewIngram/django-extra-views',
     install_requires=[
         'Django >=1.6',
