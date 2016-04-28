@@ -332,7 +332,7 @@ class FilterMixin(object):
                         **{first: db_value}).values_list(*rest).distinct()
                     if obj_list.count() > 0:
                         if len(rest) == 1:
-                            display_name = obj_list[0]
+                            display_value = obj_list[0][0]
                         else:
                             obj_list = obj_list[0]
                             display_value = '{} ({})'.format(obj_list[0], obj_list[1])
@@ -369,8 +369,6 @@ class FilterMixin(object):
             field_names = filters.get(display_name)
             if not field_names or not db_value:
                 return
-            print(display_name)
-            print(db_value)
             if isinstance(field_names, tuple):
                 field_name = field_names[0]
                 if '_id' in field_name:
