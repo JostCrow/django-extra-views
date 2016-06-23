@@ -441,8 +441,11 @@ class FilterMixin(object):
                     res = set(self.get_queryset().order_by(
                         field_name).values_list(field_name))
 
-                res = list(res)
-                res.sort()
+                try:
+                    res = list(res)
+                    res.sort()
+                except TypeError:
+                    pass
 
             options[display_name] = res
 
